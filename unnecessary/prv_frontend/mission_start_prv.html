@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mission Detections</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+}
+
+header {
+    background: #1e293b;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+}
+
+header h1 {
+    font-size: 22px;
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.badge {
+    background: #1d4ed8;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px 40px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.panel {
+    background: #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #334155;
+}
+
+.panel-title {
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: bold;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+}
+
+.stream-wrapper {
+    padding: 16px;
+}
+
+.stream-wrapper img {
+    width: 100%;
+    border-radius: 8px;
+    border: 2px solid #334155;
+}
+
+.detections-wrapper {
+    padding: 16px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+input {
+    flex: 1;
+    padding: 9px 14px;
+    border-radius: 6px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+button {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-blue { background: #2563eb; color: white; }
+.btn-green { background: #16a34a; color: white; }
+.btn-purple { background: #7c3aed; color: white; }
+.btn-red { background: #dc2626; color: white; }
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+.card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card img {
+    width: 100%;
+}
+
+.card-info {
+    padding: 8px 10px;
+    font-size: 12px;
+}
+
+.status {
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.status.error { color: #f87171; }
+.status.success { color: #4ade80; }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🎯 Mission Detections Dashboard</h1>
+
+    <div class="header-controls">
+        <button class="btn-blue" onclick="startStream()">▶ Stream</button>
+        <button class="btn-red" onclick="stopStream()">⛔ Stop</button>
+        <button class="btn-purple" onclick="startMission()">🚀 Mission</button>
+        <span class="badge" id="headerBadge">Idle</span>
+    </div>
+</header>
+
+<div class="layout">
+
+    <div class="panel">
+        <div class="panel-title">📡 Live Stream</div>
+        <div class="stream-wrapper">
+            <img id="streamImage" src="" />
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">🗂 Detections</div>
+        <div class="detections-wrapper">
+
+            <div class="controls">
+                <input type="text" id="missionId" placeholder="Enter Mission ID" />
+                <button class="btn-blue" onclick="loadMission()">Load</button>
+            </div>
+
+            <div class="status" id="status"></div>
+            <div id="images" class="grid"></div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+const BASE = "http://127.0.0.1:8000";
+let autoRefresh = null;
+
+function startStream() {
+    document.getElementById("streamImage").src = `${BASE}/stream`;
+    document.getElementById("status").innerHTML = "Stream started.";
+}
+
+function stopStream() {
+    document.getElementById("streamImage").src = "";
+    document.getElementById("status").innerHTML = "Stream stopped.";
+}
+
+async function startMission() {
+    const status = document.getElementById("status");
+
+    try {
+        status.innerHTML = "Starting mission...";
+
+        const res = await fetch(`${BASE}/Mission`, {
+            method: "POST"
+        });
+
+        if (!res.ok) throw new Error("Failed to start mission.");
+
+        const data = await res.json();
+
+        document.getElementById("missionId").value = data.mission_id;
+
+        document.getElementById("headerBadge").innerHTML =
+            `Mission ${data.mission_id} Running`;
+
+        status.className = "status success";
+        status.innerHTML = `Mission ${data.mission_id} started.`;
+
+        if (autoRefresh) clearInterval(autoRefresh);
+        autoRefresh = setInterval(loadMission, 5000);
+
+    } catch (e) {
+        status.className = "status error";
+        status.innerHTML = e.message;
+    }
+}
+
+async function loadMission() {
+    const missionId = document.getElementById("missionId").value.trim();
+    const container = document.getElementById("images");
+    const status = document.getElementById("status");
+
+    if (!missionId) return;
+
+    try {
+        const response = await fetch(`${BASE}/Mission/${missionId}`);
+        if (!response.ok) throw new Error("No detections.");
+
+        const data = await response.json();
+
+        container.innerHTML = "";
+
+        data.forEach(post => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                <img src="${post.url}" />
+                <div class="card-info">
+                    <b>${post.file_name}</b><br>
+                    Lat: ${parseFloat(post.latitude).toFixed(5)}<br>
+                    Lng: ${parseFloat(post.longitude).toFixed(5)}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        status.className = "status error";
+        status.innerHTML = error.message;
+    }
+}
+
+</script>
+
+</body>
+</html>

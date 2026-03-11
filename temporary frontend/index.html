@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mission Control</title>
+</head>
+<body>
+  <h1>Mission Control</h1>
+  <button onclick="startMission()">Start Mission</button>
+  <p id="status"></p>
+
+  <script>
+    async function startMission() {
+      document.getElementById('status').innerText = 'Starting...';
+
+      const res = await fetch('http://127.0.0.1:8000/Mission', { method: 'POST' });
+      const data = await res.json();
+      const missionId = data.mission_id;
+
+      document.getElementById('status').innerText = 'Mission started: ' + missionId;
+
+      // Go to mission page, pass mission_id in URL
+      window.location.href = 'mission.html?mission_id=' + missionId;
+    }
+  </script>
+</body>
+</html>

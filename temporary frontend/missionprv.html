@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mission Detections</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f4f6f9;
+    }
+
+    header {
+        background: #1f2937;
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .mission-input {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    input {
+        flex: 1;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    button:hover {
+        background: #1e40af;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 12px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        transition: 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+    }
+
+    .card img {
+        width: 100%;
+        border-radius: 8px;
+    }
+
+    .geo {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .loading {
+        text-align: center;
+        font-size: 18px;
+        margin-top: 20px;
+    }
+
+    .error {
+        color: red;
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Mission Detections Dashboard</h1>
+</header>
+
+<div class="container">
+
+    <div class="mission-input">
+        <input type="text" id="missionId" placeholder="Enter Mission ID">
+        <button onclick="loadMission()">Load Mission</button>
+    </div>
+
+    <div id="status" class="loading"></div>
+
+    <div id="images" class="grid"></div>
+
+</div>
+
+<script>
+async function loadMission() {
+    const missionId = document.getElementById("missionId").value.trim();
+    const container = document.getElementById("images");
+    const status = document.getElementById("status");
+
+    if (!missionId) {
+        alert("Please enter a Mission ID.");
+        return;
+    }
+
+    container.innerHTML = "";
+    status.innerHTML = "Loading mission data...";
+
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/Mission/${missionId}`);
+
+        if (!response.ok) {
+            throw new Error("Mission not found.");
+        }
+
+        const data = await response.json();
+
+        if (data.length === 0) {
+            status.innerHTML = "No detections found for this mission.";
+            return;
+        }
+
+        status.innerHTML = "";
+
+        data.forEach(post => {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            card.innerHTML = `
+                <img src="${post.url}" />
+                <div class="geo">
+                    <strong>Latitude:</strong> ${post.latitude} <br/>
+                    <strong>Longitude:</strong> ${post.longitude}
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        status.innerHTML = `<div class="error">${error.message}</div>`;
+    }
+}
+</script>
+
+</body>
+</html>
