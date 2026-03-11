@@ -28,7 +28,7 @@ annotation_queue = Queue(maxsize=10)
 crop_queue = Queue(maxsize=10)
 result_queue = multiprocessing.Queue()
 
-stream_url = r"C:\Users\nargi\VS_CODE\person-detection-python\Screen Recording 2025-12-27 025837.mp4"
+stream_url = "rtsp_url_here"
 
 # ----------------------------
 # GEOLOCATION MOCK
@@ -88,7 +88,7 @@ def yolo_process(frame_queue, annotation_queue, crop_queue):
 
 
     # Load a pretrained YOLO26 nano model
-    model = YOLO("app\model\yolo26n.pt")
+    model = YOLO("model_location_here")
     
 
 
