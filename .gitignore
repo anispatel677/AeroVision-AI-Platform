@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Development copies
+copy_of_main_were_I_make_changes_first/
+
+# Temporary folders
+unnecessary/
+
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# YOLO models
+*.pt
+
+# YOLO outputs
+runs/
+
