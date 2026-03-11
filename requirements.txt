@@ -1,9 +1,0 @@
-fastapi==0.135.1
-ImageHash==4.3.2
-imagekitio==5.2.0
-numpy==2.4.3
-opencv_python==4.13.0.90
-Pillow==12.1.1
-python-dotenv==1.2.2
-SQLAlchemy==2.0.48
-ultralytics==8.4.14
