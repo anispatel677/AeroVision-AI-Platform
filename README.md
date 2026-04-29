@@ -39,4 +39,4 @@ It allows rescuers to stream live video from the UAV, view real-time sensor data
 
 ![Detections](./images/3_detections.png)
 
-![Pinpoint Location](./images/4_pin-point-location.png)
+![Pinpoint Location](./images/4_pin-point location.png)
