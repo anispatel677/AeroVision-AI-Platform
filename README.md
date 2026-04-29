@@ -33,9 +33,10 @@ It allows rescuers to stream live video from the UAV, view real-time sensor data
 
 ## 🖼️ Screenshots
 
-_Add your project images here_
+![Start Mission](./images/1_start-mission.png)
 
-```md
-![Dashboard](./images/dashboard.png)
-![Map View](./images/map.png)
-![Detections](./images/detections.png)
+![Mission Live](./images/2_mission-live.png)
+
+![Detections](./images/3_detections.png)
+
+![Pinpoint Location](./images/4_pin-point-location.png)
